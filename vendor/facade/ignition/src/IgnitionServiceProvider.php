@@ -2,6 +2,7 @@
 
 namespace Facade\Ignition;
 
+use Throwable;
 use Monolog\Logger;
 use Illuminate\Support\Arr;
 use Facade\FlareClient\Flare;
@@ -44,6 +45,7 @@ use Facade\Ignition\SolutionProviders\BadMethodCallSolutionProvider;
 use Facade\Ignition\SolutionProviders\DefaultDbNameSolutionProvider;
 use Facade\Ignition\SolutionProviders\MergeConflictSolutionProvider;
 use Facade\Ignition\SolutionProviders\MissingAppKeySolutionProvider;
+use Facade\Ignition\SolutionProviders\MissingColumnSolutionProvider;
 use Facade\Ignition\SolutionProviders\MissingImportSolutionProvider;
 use Facade\Ignition\SolutionProviders\TableNotFoundSolutionProvider;
 use Illuminate\View\Engines\CompilerEngine as LaravelCompilerEngine;
@@ -167,8 +169,12 @@ class IgnitionServiceProvider extends ServiceProvider
         $this->app->singleton(IgnitionConfig::class, function () {
             $options = [];
 
-            if ($configPath = $this->getConfigFileLocation()) {
-                $options = require $configPath;
+            try {
+                if ($configPath = $this->getConfigFileLocation()) {
+                    $options = require $configPath;
+                }
+            } catch (Throwable $e) {
+                // possible open_basedir restriction
             }
 
             return new IgnitionConfig($options);
@@ -302,6 +308,7 @@ class IgnitionServiceProvider extends ServiceProvider
             InvalidRouteActionSolutionProvider::class,
             ViewNotFoundSolutionProvider::class,
             MergeConflictSolutionProvider::class,
+            MissingColumnSolutionProvider::class,
         ];
     }
 
