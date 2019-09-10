@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Model\Product;
+use App\Model\Review;
 use Illuminate\Http\Request;
 use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Product\ProductCollection;
+
 
 class ProductController extends Controller
 {
@@ -15,8 +18,9 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::paginate(25);
-        return ProductResource::collection($products);
+        // $products = Product::->get();
+        // dd($products);
+        return ProductCollection::collection(Product::all());
     }
 
     /**
