@@ -7,10 +7,14 @@ use App\Model\Review;
 use Illuminate\Http\Request;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductCollection;
-
+use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
+    public function __construct() 
+    {
+        $this->middleware('auth:api')->except('index', 'show');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -40,7 +44,24 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate(request(),[
+            'name' => 'required|unique:products',
+            'details' => 'required',
+            'price' => 'required',
+            'discount' => 'required|max:2',
+            'stock' => 'required',
+        ]);
+        $product = new Product;
+        $product->name = $request->name;
+        $product->details = $request->details;
+        $product->price = $request->price;
+        $product->discount = $request->discount;
+        $product->stock = $request->stock;
+        $product->save();
+        return response([
+            'data' => new ProductResource($product),
+        ], Response::HTTP_CREATED);
+
     }
 
     /**
